@@ -22,228 +22,606 @@
 <body>
 
     <div class="container">
+
         <div>
             <nav>
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link " onclick="mosdnsui.btn.base()" data-toggle="tab" data-target="#nav-home"
-                        type="button" role="tab">
+                <div style="position: relative;" class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link nav-link-main active" onclick="mosdnsui.btn.base()" data-toggle="tab"
+                        data-target="#nav-home" type="button" role="tab">
                         基本设置
                     </button>
-                    <button class="nav-link active" onclick="mosdnsui.btn.base()" data-toggle="tab"
+                    <button class="nav-link nav-link-main " onclick="mosdnsui.btn.base()" data-toggle="tab"
                         data-target="#nav-rule" type="button" role="tab">
                         规则列表
                     </button>
-                    <button class="nav-link" onclick="mosdnsui.btn.base()" data-toggle="tab" data-target="#nav-data"
-                        type="button" role="tab">
+                    <button class="nav-link nav-link-main " onclick="mosdnsui.btn.base()" data-toggle="tab"
+                        data-target="#nav-data" type="button" role="tab">
                         更新数据库
                     </button>
+                    <button onclick="mosdnsui.btn.save()" class="nav-link nav-link-save"
+                        style="position: absolute; right: 0;" type="button" role="tab">保存</button>
+
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade  " id="nav-home" role="tabpanel">
-                    <div class="container custom_from">
-                        <div class="row align-items-start">
-                            <div class="col">启用</div>
-                            <div class="col-6">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1">
-                                </div>
-                            </div>
-                            <div class="col">
+                <div class="tab-pane fade tab-pane-main active show " id="nav-home" role="tabpanel">
 
+                    <div class="row" style="margin-top: 1.5rem">
+                        <div class="col-3">
+                            <div class="nav flex-column nav-pills" role="tablist">
+                                <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
+                                    data-target="base" type="button" role="tab">基本配置</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="high" type="button" role="tab">高级配置</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="api" type="button" role="tab">API 选项</button>
                             </div>
                         </div>
-                        <div class="row align-items-start">
-                            <div class="col">配置文件</div>
-                            <div class="col-6">
-                                <select class="form-control" id="config">
-                                    <option value="/etc/mosdns/config.yaml">内置预设</option>
-                                    <option value="/etc/mosdns/config_custom.yaml">自定义</option>
-                                </select>
-                            </div>
-                            <div class="col">
 
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
-                            <div class="col">监听端口</div>
-                            <div class="col-6">
-                                <input value="53" type="text" class="form-control">
-                            </div>
-                            <div class="col">
+                        <div class="col-9">
+                            <div class="tab-content">
+                                <div data-parent="base" class="tab-pane fade show active" role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
+                                            <div class="col">启用</div>
+                                            <div class="col-6">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="inlineCheckbox1">
+                                                </div>
+                                            </div>
+                                            <div class="col">
 
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
-                            <div class="col">日志等级</div>
-                            <div class="col-6">
-                                <select class="form-control" id="config">
-                                    <option value="debug">调试</option>
-                                    <option value="info">信息</option>
-                                    <option value="warn">警告</option>
-                                    <option value="error">错误</option>
-                                </select>
-                            </div>
-                            <div class="col">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">配置文件</div>
+                                            <div class="col-6">
+                                                <select class="form-control" id="config">
+                                                    <option value="/etc/mosdns/config.yaml">内置预设</option>
+                                                    <option value="/etc/mosdns/config_custom.yaml">自定义</option>
+                                                </select>
+                                            </div>
+                                            <div class="col">
 
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
-                            <div class="col">日志文件</div>
-                            <div class="col-6">
-                                <input value="/var/log/mosdns.log" type="text" class="form-control">
-                            </div>
-                            <div class="col">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">监听端口</div>
+                                            <div class="col-6">
+                                                <input value="53" type="text" class="form-control">
+                                            </div>
+                                            <div class="col">
 
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
-                            <div class="col">国内DNS</div>
-                            <div class="col-6">
-                                <div id="chinadns_box" class="btn-group  " style="width: 100%;">
-                                    <button style="text-align: left;" class="btn btn-secondary dropdown-toggle"
-                                        type="button" data-toggle="dropdown">
-                                        请选择
-                                    </button>
-                                    <div class="dropdown-menu" id="chinadns_drop">
-                                        <a data-value="119.29.29.29" class="dropdown-item" href="javascript:void()">
-                                            腾讯公共 DNS（119.29.29.29）
-                                        </a>
-                                        <a data-value="119.28.28.28" class="dropdown-item" href="javascript:void()">
-                                            腾讯公共 DNS（119.28.28.28）
-                                        </a>
-                                        <a data-value="223.5.5.5" class="dropdown-item" href="javascript:void()">
-                                            阿里云公共 DNS（223.5.5.5）
-                                        </a>
-                                        <a data-value="223.6.6.6" class="dropdown-item" href="javascript:void()">
-                                            阿里云公共 DNS（223.6.6.6）
-                                        </a>
-                                        <a data-value="114.114.114.114" class="dropdown-item" href="javascript:void()">
-                                            信风公共 DNS（114.114.114.114）
-                                        </a>
-                                        <a data-value="114.114.115.115" class="dropdown-item" href="javascript:void()">
-                                            信风公共 DNS（114.114.115.115）
-                                        </a>
-                                        <a data-value="180.76.76.76" class="dropdown-item" href="javascript:void()">
-                                            百度公共 DNS（180.76.76.76）
-                                        </a>
-                                        <a data-value="https://doh.pub/dns-query" class="dropdown-item"
-                                            href="javascript:void()">
-                                            腾讯公共 DNS（DNS over HTTPS）
-                                        </a>
-                                        <a data-value="quic://dns.alidns.com" class="dropdown-item"
-                                            href="javascript:void()">
-                                            阿里云公共 DNS（DNS over QUIC）
-                                        </a>
-                                        <a data-value="https://dns.alidns.com/dns-query" class="dropdown-item"
-                                            href="javascript:void()">
-                                            阿里云公共 DNS（DNS over HTTPS）
-                                        </a>
-                                        <a data-value="h3://dns.alidns.com/dns-query" class="dropdown-item"
-                                            href="javascript:void()">
-                                            阿里云公共 DNS（DNS over HTTPS/3）
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void()">
-                                            360 安全 DNS（DNS over HTTPS）
-                                        </a>
-                                        <a data-value="https://doh.360.cn/dns-query" class="dropdown-item"
-                                            href="javascript:void()">
-                                            百度公共 DNS（180.76.76.76）
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="javascript:void()">
-                                            <input type="text" placeholder="-- 自定义 --">
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">日志等级</div>
+                                            <div class="col-6">
+                                                <select class="form-control" id="config">
+                                                    <option value="debug">调试</option>
+                                                    <option value="info">信息</option>
+                                                    <option value="warn">警告</option>
+                                                    <option value="error">错误</option>
+                                                </select>
+                                            </div>
+                                            <div class="col">
 
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">日志文件</div>
+                                            <div class="col-6">
+                                                <input value="/var/log/mosdns.log" type="text" class="form-control">
+                                            </div>
+                                            <div class="col">
 
-                            <div class="col">国外DNS</div>
-                            <div class="col-6">
-                                <div id="overseasdns_box" class="btn-group " style="width: 100%; ">
-                                    <button style="text-align: left;" class="btn btn-secondary dropdown-toggle"
-                                        type="button" data-toggle="dropdown">
-                                        请选择
-                                    </button>
-                                    <div class="dropdown-menu" id="overseasdns_drop">
-                                        <a data-value="tls://1.1.1.1" class="dropdown-item" href="javascript:void()">
-                                            CloudFlare 公共 DNS（1.1.1.1）
-                                        </a>
-                                        <a data-value="tls://1.0.0.1" class="dropdown-item" href="javascript:void()">
-                                            CloudFlare 公共 DNS（1.0.0.1）
-                                        </a>
-                                        <a data-value="tls://8.8.8.8" class="dropdown-item" href="javascript:void()">
-                                            谷歌公共 DNS（8.8.8.8）
-                                        </a>
-                                        <a data-value="tls://8.8.4.4" class="dropdown-item" href="javascript:void()">
-                                            谷歌公共 DNS（8.8.4.4）
-                                        </a>
-                                        <a data-value="tls://9.9.9.9" class="dropdown-item" href="javascript:void()">
-                                            Quad9 公共 DNS（9.9.9.9）
-                                        </a>
-                                        <a data-value="tls://149.112.112.112" class="dropdown-item"
-                                            href="javascript:void()">
-                                            Quad9 公共 DNS（149.112.112.112）
-                                        </a>
-                                        <a data-value="tls://208.67.222.222" class="dropdown-item"
-                                            href="javascript:void()">
-                                            思科公共 DNS（208.67.222.222）
-                                        </a>
-                                        <a data-value="tls://208.67.220.220" class="dropdown-item"
-                                            href="javascript:void()">
-                                            思科公共 DNS（208.67.220.220）
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="javascript:void()">
-                                            <input type="text" placeholder="-- 自定义 --">
-                                        </a>
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">国内DNS</div>
+                                            <div class="col-6">
+                                                <div class="btn-group btn-group-custom" style="">
+                                                    <button onclick="mosdnsui.btn.dns('chinadns')" type="button"
+                                                        style="text-align: left; width: 90%;"
+                                                        class="btn btn-secondary btn-dns-china">请选择</button>
+                                                    <button type="button" onclick="mosdnsui.btn.dns_remove()"
+                                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
+                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">国外DNS</div>
+                                            <div class="col-6">
+                                                <div class="btn-group btn-group-custom">
+                                                    <button onclick="mosdnsui.btn.dns('overseasdns')" type="button"
+                                                        style="text-align: left; width: 90%;"
+                                                        class="btn btn-secondary btn-dns-overseas">请选择</button>
+                                                    <button type="button" onclick="mosdnsui.btn.dns_remove()"
+                                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
+                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">Bootstrap DNS 服务器</div>
+                                            <div class="col-6">
+                                                <div class="btn-group btn-group-custom">
+                                                    <button onclick="mosdnsui.btn.dns('bootstrapdns')" type="button"
+                                                        style="text-align: left; width: 90%;"
+                                                        class="btn btn-secondary btn-dns-bootstrap">请选择</button>
+                                                    <button type="button"
+                                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split ">
+                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                            </div>
+                                <div data-parent="high" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
 
-                            <div class="col">
+                                            <div class="col">DNS 服务器并发数（默认 2）</div>
+                                            <div class="col-6">
+                                                <input type="text" value="2" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">空闲超时</div>
+                                            <div class="col-6">
+                                                <input type="text" value="30" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">DNS 缓存大小</div>
+                                            <div class="col-6">
+                                                <input type="text" value="8000" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">乐观缓存 TTL</div>
+                                            <div class="col-6">
+                                                <input type="text" value="86400" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">自动保存缓存</div>
+                                            <div class="col-6">
+                                                <input type="text" value="3600" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">覆盖最小 TTL 值（默认 0）</div>
+                                            <div class="col-6">
+                                                <input type="text" value="0" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">覆盖最大 TTL 值（默认 0）</div>
+                                            <div class="col-6">
+                                                <input type="text" value="0" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">TCP/DoT 连接复用</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">禁用 TLS 证书</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">防止 DNS 泄漏</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">启用 DNS 广告过滤</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input data-target="adfilter"
+                                                        onclick="mosdnsui.btn.element_filter()" class="form-check-input"
+                                                        type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div data-parent="adfilter" class="row align-items-start custom-hide ">
+
+                                            <div class="col">广告过滤规则来源</div>
+                                            <div class="col-6">
+                                                <div class="btn-group btn-group-custom">
+                                                    <button onclick="mosdnsui.btn.dns('adfilter')" type="button"
+                                                        style="text-align: left; width: 90%;"
+                                                        class="btn btn-secondary btn-dns-overseas">请选择</button>
+                                                    <button type="button" onclick="mosdnsui.btn.dns_remove()"
+                                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
+                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">启用 EDNS 客户端子网</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input data-target="ednsfilter"
+                                                        onclick="mosdnsui.btn.element_filter()" class="form-check-input"
+                                                        type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div data-parent="ednsfilter" class="row align-items-start custom-hide ">
+
+                                            <div class="col">IP 地址</div>
+                                            <div class="col-6">
+                                                <input type="text" value="" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div data-parent="api" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
+
+                                            <div class="col">API 监听端口</div>
+                                            <div class="col-6">
+                                                <input type="text" value="9091" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">刷新缓存</div>
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-info">刷新缓存</button>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="tab-pane fade tab-pane-main show " id="nav-rule" role="tabpanel">
+                    <div class="row" style="margin-top: 1.5rem">
+                        <div class="col-3">
+                            <div class="nav flex-column nav-pills" role="tablist">
+                                <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
+                                    data-target="whitelist" type="button" role="tab">白名单</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="blacklist" type="button" role="tab">黑名单</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="greylist" type="button" role="tab">灰名单</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="ddnslist" type="button" role="tab">DDNS域名</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="hostslist" type="button" role="tab">Hosts</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="redirectionlist" type="button" role="tab">重定向</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link " data-toggle="pill"
+                                    data-target="prtlist" type="button" role="tab">PRT 黑名单</button>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="tab-content">
+
+                                <div data-parent="whitelist" class="tab-pane fade show active" role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="blacklist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="greylist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="ddnslist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="hostslist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="redirectionlist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-parent="prtlist" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="tab-pane fade tab-pane-main show " id="nav-data" role="tabpanel">
+                    <div class="row" style="margin-top: 1.5rem">
+                        <div class="col-3">
+                            <div class="nav flex-column nav-pills" role="tablist">
+                                <button class="nav-link active" data-toggle="pill" data-target="#v-pills-home"
+                                    type="button" role="tab">更新广告规则、GeoIP & GeoSite 数据库</button>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="tab-content">
+
+                                <div class="tab-pane fade show active" role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
+
+                                            <div class="col">启用自动更新</div>
+                                            <div class="col-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">更新周期</div>
+                                            <div class="col-6">
+                                                <select class="form-control" id="config">
+                                                    <option value="*">每天</option>
+                                                    <option value="1">每周一</option>
+                                                    <option value="2">每周二</option>
+                                                    <option value="3">每周三</option>
+                                                    <option value="4">每周四</option>
+                                                    <option value="5">每周五</option>
+                                                    <option value="6">每周六</option>
+                                                    <option value="7">每周日</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">更新时间</div>
+                                            <div class="col-6">
+                                                <select class="form-control" id="config">
+                                                    <option value="0">0:00</option>
+                                                    <option value="1">1:00</option>
+                                                    <option value="2" selected="">2:00</option>
+                                                    <option value="3">3:00</option>
+                                                    <option value="4">4:00</option>
+                                                    <option value="5">5:00</option>
+                                                    <option value="6">6:00</option>
+                                                    <option value="7">7:00</option>
+                                                    <option value="8">8:00</option>
+                                                    <option value="9">9:00</option>
+                                                    <option value="10">10:00</option>
+                                                    <option value="11">11:00</option>
+                                                    <option value="12">12:00</option>
+                                                    <option value="13">13:00</option>
+                                                    <option value="14">14:00</option>
+                                                    <option value="15">15:00</option>
+                                                    <option value="16">16:00</option>
+                                                    <option value="17">17:00</option>
+                                                    <option value="18">18:00</option>
+                                                    <option value="19">19:00</option>
+                                                    <option value="20">20:00</option>
+                                                    <option value="21">21:00</option>
+                                                    <option value="22">22:00</option>
+                                                    <option value="23">23:00</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">GitHub 代理</div>
+                                            <div class="col-6">
+                                                <input type="text" value="https://gh-proxy.com" class="form-control" />
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+
+                                            <div class="col">数据库更新</div>
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-info">检查并更新</button>
+                                            </div>
+
+                                            <div class="col">
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
 
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane fade active show" id="nav-rule" role="tabpanel">
-                    <div class="container custom_from">
-                        <div class="row align-items-start">
-                            <div class="col">启用</div>
-                            <div class="col-6">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1">
-                                </div>
-                            </div>
-                            <div class="col">
-
-                            </div>
-                        </div>
-                        <div class="row align-items-start">
-                            <div class="col">配置文件</div>
-                            <div class="col-6">
-                                <select class="form-control" id="config">
-                                    <option value="/etc/mosdns/config.yaml">内置预设</option>
-                                    <option value="/etc/mosdns/config_custom.yaml">自定义</option>
-                                </select>
-                            </div>
-                            <div class="col">
-
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="tab-pane fade active show" id="nav-data" role="tabpanel">
 
                 </div>
+
             </div>
         </div>
 
