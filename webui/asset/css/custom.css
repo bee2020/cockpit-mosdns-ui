@@ -1,0 +1,19 @@
+.custom_from .row+.row {
+    margin-top: 1rem
+}
+
+.btn-group button:after {
+    content: "×";
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    font-weight: bold;
+    color: rgb(204, 68, 68);
+    pointer-events: auto;
+    padding: 0px 6px;
+    border: 1px solid var(--border-color-high);
+    border-radius: 0px 3px 3px 0px;
+}
