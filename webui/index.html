@@ -4,16 +4,30 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'" />
 
     <link rel="stylesheet" href="./asset/css/bootstrap.min.css">
     <link rel="stylesheet" href="./asset/css/custom.css">
 
     <script src="../base1/cockpit.js"></script>
+    <script src="./asset/js/js-yaml.min.js" type="text/javascript"></script>
     <script src="./asset/js/mosdns_event.js" type="text/javascript"></script>
 
     <script type="text/javascript" charset="utf-8">
 
         console.log(mosdnsui);
+
+        window.onload = () => {
+            mosdnsui.getStatus('jellyfin');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'whitelist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'blacklist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'greylist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'ddnslist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'hostslist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'redirectionlist');
+            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'prtlist');
+            mosdnsui.readConfig('/usr/share/cockpit/mosdns/config.yaml', 'prtlist');
+        };
 
     </script>
 
@@ -23,7 +37,7 @@
 
     <div class="container">
 
-        <div>
+        <div style="margin-top: 3rem;">
             <nav>
                 <div style="position: relative;" class="nav nav-tabs" id="nav-tab" role="tablist">
                     <button class="nav-link nav-link-main active" onclick="mosdnsui.btn.base()" data-toggle="tab"
@@ -38,6 +52,8 @@
                         data-target="#nav-data" type="button" role="tab">
                         更新数据库
                     </button>
+                    <button class="btn btn-info" id="mosdnsstatus" style="position: absolute; right: 30%;" type="button"
+                        role="tab"></button>
                     <button onclick="mosdnsui.btn.save()" class="nav-link nav-link-save"
                         style="position: absolute; right: 0;" type="button" role="tab">保存</button>
 
@@ -454,49 +470,50 @@
                                 <div data-parent="whitelist" class="tab-pane fade show active" role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="whitelist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="blacklist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="blacklist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="greylist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="greylist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="ddnslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="ddnslist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="hostslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="hostslist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="redirectionlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="redirectionlist" class="form-control"
+                                                rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="prtlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="prtlist" class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>

@@ -1,0 +1,12 @@
+{
+    "version": 0,
+    "menu": {
+        "file-sharing": {
+            "label": "Mosdns",
+            "path": "./webui/index.html",
+            "order": 116,
+            "docs": []
+        }
+    },
+    "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval'"
+}

@@ -17,6 +17,17 @@
 
     var mosdns = {
 
+        yaml : {
+            syntax: {
+                parse: (content) => {
+                    return jsyaml.load(content, 'utf-8');
+                },
+                stringify: (data) => {
+                    return jsyaml.safeDump(data);
+                }
+            }
+        },
+
         setting : {
             chinadns : {
                 '119.29.29.29' : '腾讯公共 DNS（119.29.29.29）',
@@ -226,7 +237,120 @@
             save : () => {
 
             }
-        }
+        },
+
+        getStatus : () => {
+
+            mosdns.cockpitSpawn(['systemctl', 'status', 'mosdns'], (result) => {
+
+                let btnStatus = document.querySelector('#mosdnsstatus');
+
+                if(result.hasOwnProperty('message')) {
+                    btnStatus.innerHTML = result['message'];
+                    return;
+                }
+
+                let statusRegex = /Active:\s(.+?)\s/, match = data.match(statusRegex);
+
+                btnStatus.innerHTML = match ? match[1] : '无法提取的状态信息';
+
+            });
+        },
+
+        readCustomList : (dirfile, type) => {
+            console.log(dirfile);
+            mosdns.cockpitFileRead(dirfile, (result, tag) => {
+                console.log(result);
+                console.log(tag);
+                if(result.hasOwnProperty('message')) {
+                    return;
+                }
+
+                document.querySelector('textarea[data-tag="'+ type +'"]').innerHTML = result;
+
+                
+            });
+        },
+
+        readConfig : (dirfile, type) => {
+            console.log(dirfile);
+            mosdns.cockpitFileReadYAML(dirfile, (result, tag) => {
+                console.log(result);
+                console.log(tag);
+                if(result.hasOwnProperty('message')) {
+                    return;
+                }
+            });
+        },
+
+        cockpitSpawn : (list_paramater, callBack) => {
+            cockpit.spawn(list_paramater)
+            .done(data => {
+                callBack(data);
+            })
+            .fail(error => {
+                callBack(error);
+            });
+        },
+
+        cockpitFileRead : (dirfile, callBack) => {
+            cockpit.file(dirfile).read()
+            .then((content, tag) => {
+                callBack(content, tag);
+            })
+            .catch(error => {
+                callBack(error);
+            });
+        },
+
+        cockpitFileReadYAML : (dirfile, callBack) => {
+
+            cockpit.file(dirfile, mosdns.yaml).read()
+            .then((content, tag) => {
+                callBack(content, tag);
+            })
+            .catch(error => {
+                callBack(error);
+            });
+        },
+
+
+        getservice : (serviceName) => {
+            var apiUrl = '/cockpit/api/systemd/units/' + serviceName;
+    
+            console.log('cockpit', cockpit);
+            
+            let httpGet = cockpit.http().get(apiUrl);
+            
+            httpGet.response((status, headers) => {
+                console.log(status);
+                console.log(headers);
+            }).then(data => {
+                console.log('data', data);
+            }).catch(error => {
+                console.log('error', error);
+            });
+            
+            console.log( httpGet );
+        
+            let http = cockpit.http(apiUrl, [
+            
+            ]);
+            
+            console.log('http', http);
+            
+            let request = http.request({
+            'method' : 'GET'
+            });
+            
+            console.log('request', request);
+            
+            request.response( (status, headers) => {
+            console.log(status);
+            console.log(headers);
+            });
+        },
+
 
     };
 
