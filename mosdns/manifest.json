@@ -3,7 +3,7 @@
     "menu": {
         "file-sharing": {
             "label": "Mosdns",
-            "path": "./webui/index.html",
+            "path": "index.html",
             "order": 116,
             "docs": []
         }
