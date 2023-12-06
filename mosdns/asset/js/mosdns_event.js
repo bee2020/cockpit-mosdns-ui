@@ -17,14 +17,35 @@
 
     var mosdns = {
 
+        default : () => {
+            return '{"log":{"level":"info","file":"/var/log/mosdns.log"},"api":{"http":"0.0.0.0:9091"},"include":[],"plugins":[{"tag":"geosite_cn","type":"domain_set","args":{"files":["/etc/mosdns/geo/geosite_cn.txt"]}},{"tag":"geoip_cn","type":"ip_set","args":{"files":["/etc/mosdns/geo/geoip_cn.txt"]}},{"tag":"geosite_apple","type":"domain_set","args":{"files":["/etc/mosdns/geo/geosite_apple.txt"]}},{"tag":"geosite_no_cn","type":"domain_set","args":{"files":["/etc/mosdns/geo/geosite_geolocation-!cn.txt"]}},{"tag":"whitelist","type":"domain_set","args":{"files":["/etc/mosdns/rule/whitelist.txt"]}},{"tag":"blocklist","type":"domain_set","args":{"files":["/etc/mosdns/rule/blocklist.txt"]}},{"tag":"greylist","type":"domain_set","args":{"files":["/etc/mosdns/rule/greylist.txt"]}},{"tag":"ddnslist","type":"domain_set","args":{"files":["/etc/mosdns/rule/ddnslist.txt"]}},{"tag":"hosts","type":"hosts","args":{"files":["/etc/mosdns/rule/hosts.txt"]}},{"tag":"redirect","type":"redirect","args":{"files":["/etc/mosdns/rule/redirect.txt"]}},{"tag":"adlist","type":"domain_set","args":{"files":["/etc/mosdns/geo/geosite_category-ads-all.txt"]}},{"tag":"local_ptr","type":"domain_set","args":{"files":["/etc/mosdns/rule/local-ptr.txt"]}},{"tag":"cloudflare_cidr","type":"ip_set","args":{"files":["/etc/mosdns/rule/cloudflare-cidr.txt"]}},{"tag":"lazy_cache","type":"cache","args":{"size":8000,"lazy_cache_ttl":86400,"dump_file":"/etc/mosdns/cache.dump","dump_interval":3600}},{"tag":"forward_xinfeng_udp","type":"forward","args":{"concurrent":2,"upstreams":[{"addr":"114.114.114.114"},{"addr":"114.114.115.115"}]}},{"tag":"forward_local","type":"forward","args":{"concurrent":2,"upstreams":[{"addr":"192.168.0.50","bootstrap":"119.29.29.29","enable_pipeline":false,"insecure_skip_verify":false,"idle_timeout":30}]}},{"tag":"forward_remote","type":"forward","args":{"concurrent":2,"upstreams":[{"addr":"192.168.0.50","bootstrap":"119.29.29.29","enable_pipeline":false,"insecure_skip_verify":false,"idle_timeout":30}]}},{"tag":"forward_remote_upstream","type":"sequence","args":[{"exec":"prefer_ipv4"},{"exec":"$forward_remote"}]},{"tag":"modify_ttl","type":"sequence","args":[{"exec":"ttl 0-0"}]},{"tag":"modify_ddns_ttl","type":"sequence","args":[{"exec":"ttl 5-5"}]},{"tag":"has_resp_sequence","type":"sequence","args":[{"matches":"qname $ddnslist","exec":"$modify_ddns_ttl"},{"matches":"!qname $ddnslist","exec":"$modify_ttl"},{"matches":"has_resp","exec":"accept"}]},{"tag":"query_is_non_local_ip","type":"sequence","args":[{"exec":"$forward_local"},{"matches":"!resp_ip $geoip_cn","exec":"drop_resp"}]},{"tag":"fallback","type":"fallback","args":{"primary":"forward_remote_upstream","secondary":"forward_remote_upstream","threshold":500,"always_standby":true}},{"tag":"apple_domain_fallback","type":"fallback","args":{"primary":"query_is_non_local_ip","secondary":"forward_xinfeng_udp","threshold":100,"always_standby":true}},{"tag":"query_is_apple_domain","type":"sequence","args":[{"matches":"!qname $geosite_apple","exec":"return"},{"exec":"$apple_domain_fallback"}]},{"tag":"query_is_ddns_domain","type":"sequence","args":[{"matches":"qname $ddnslist","exec":"$forward_local"}]},{"tag":"query_is_local_domain","type":"sequence","args":[{"matches":"qname $geosite_cn","exec":"$forward_local"}]},{"tag":"query_is_no_local_domain","type":"sequence","args":[{"matches":"qname $geosite_no_cn","exec":"$forward_remote_upstream"}]},{"tag":"query_is_whitelist_domain","type":"sequence","args":[{"matches":"qname $whitelist","exec":"$forward_local"}]},{"tag":"query_is_greylist_domain","type":"sequence","args":[{"matches":"qname $greylist","exec":"$forward_remote_upstream"}]},{"tag":"query_is_reject_domain","type":"sequence","args":[{"matches":"qname $blocklist","exec":"reject 3"},{"matches":"qname $adlist","exec":"reject 3"},{"matches":["qtype 12","qname $local_ptr"],"exec":"reject 3"},{"matches":"qtype 65","exec":"reject 3"}]},{"tag":"main_sequence","type":"sequence","args":[{"exec":"$hosts"},{"exec":"jump has_resp_sequence"},{"matches":["!qname $ddnslist","!qname $blocklist","!qname $adlist","!qname $local_ptr"],"exec":"$lazy_cache"},{"exec":"$redirect"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_ddns_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_whitelist_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_reject_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_greylist_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_local_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$query_is_no_local_domain"},{"exec":"jump has_resp_sequence"},{"exec":"$fallback"}]},{"tag":"udp_server","type":"udp_server","args":{"entry":"main_sequence","listen":":5335"}},{"tag":"tcp_server","type":"tcp_server","args":{"entry":"main_sequence","listen":":5335"}}]}';
+        },
+            
+
+        CodeMirror : {},
+
+        initCodeMirror : () => {
+            let codeMirror = CodeMirror.fromTextArea(document.querySelector('#configEdit'), {
+                mode: "yaml",                       // 设置编辑器模式为 YAML
+                lineNumbers: true,                  // 显示行号
+                lineWrapping: true,                 // 自动换行
+                styleActiveLine: true,              // 选中行高亮
+                matchBrackets: true,                // 匹配括号
+                autoCloseBrackets: true,
+                lint: true,                         // 代码出错提醒
+                indentUnit: 4,                      // 缩进配置（默认为2）
+                autoRefresh: true,
+                theme: "monokai",                   // 主题
+                gutters: ["CodeMirror-lint-markers"], // 样式的宽度
+            });
+            mosdns.CodeMirror = codeMirror;
+        },
+
         yaml : {
             syntax: {
                 parse: (content) => {
-                    return jsyaml.load(content, 'utf-8');
+                    return mosdns.CodeMirror.setValue(content);
                 },
-                stringify: (data) => {
-                    return jsyaml.safeDump(data);
-                }
             }
         },
 
@@ -201,6 +222,49 @@
 
             },
 
+            install : () => {
+                let event = window.event || arguments.callee.caller.arguments,
+                    target = event.currentTarget, textarea = document.querySelector('textarea[data-tag="install"]') ;
+
+                target.setAttribute('disabled', 'disabled');
+
+                textarea.innerHTML = '';
+
+                mosdns.cockpitSpawnStream(["/bin/bash", "-c", `/usr/share/cockpit/mosdns/install.sh `], (data, type) => {
+                    switch(type) {
+                        case 'stream' :
+                            textarea.innerHTML += data;
+                            textarea.scrollTop = textarea.scrollHeight;
+                            break;
+                        case 'then' :
+                            textarea.innerHTML += data;
+                            textarea.scrollTop = textarea.scrollHeight;
+                            mosdns.replaceConfig(target, textarea);
+                            
+                            break;
+                        default :
+                            textarea.innerHTML += data;
+                            textarea.scrollTop = textarea.scrollHeight;
+                            target.removeAttribute('disabled');
+                            break;
+                    }
+                });
+            },
+
+            geoUpdate : () => {
+                let event = window.event || arguments.callee.caller.arguments,
+                    target = event.currentTarget, divider = document.querySelector('div[data-update="geo"]') ;
+
+                target.setAttribute('disabled', 'disabled');
+
+                divider.innerHTML = '';
+
+                mosdns.cockpitSpawn(["/bin/bash", "-c", "/usr/share/cockpit/mosdns/update_geo.sh"], (data) => {
+                    divider.innerHTML = data;
+                    target.removeAttribute('disabled');
+                });
+            },
+
             card : () => {
                 let event = window.event || arguments.callee.caller.arguments,
                     target = event.currentTarget, card = target.parentNode.parentNode.parentNode,
@@ -239,20 +303,71 @@
             }
         },
 
-        getStatus : () => {
+        replaceConfig : (target, textarea) => {
+            let yaml_args = mosdns.CodeMirror.getValue();
+            cockpit.file("/etc/mosdns/config.yaml").replace(yaml_args)
+            .then(tag => {
+                textarea.innerHTML += tag + ' 配置文件写入成功 \r\n';
+                mosdns.cockpitSpawn(['mosdns', 'service', 'start'], (result) => {
+                    textarea.innerHTML += result + '启动成功 \r\n';
+                    textarea.scrollTop = textarea.scrollHeight;
+                    target.removeAttribute('disabled');
+                    mosdns.getStatus('mosdns');
+                });
+            })
+            .catch(error => {
+                textarea.innerHTML += error;
+                target.removeAttribute('disabled');
+            });
+            
+        },
 
-            mosdns.cockpitSpawn(['systemctl', 'status', 'mosdns'], (result) => {
+        readMosdnsFiles : () => {
 
-                let btnStatus = document.querySelector('#mosdnsstatus');
+            mosdns.getStatus('mosdns');
 
-                if(result.hasOwnProperty('message')) {
-                    btnStatus.innerHTML = result['message'];
+            for(let i = 0, filter, list_filter = document.querySelectorAll('#customFilter textarea'); filter = list_filter[i]; i++) {
+                mosdns.cockpitFileRead(filter.getAttribute('data-file'), (result, tag) => {
+                    if(result && !result.hasOwnProperty('message')) {
+                        filter.innerHTML = result;
+                    }
+                });
+            }
+
+            mosdns.cockpitFileReadYAML('/etc/mosdns/config.yaml', (result, tag) => {
+
+                if(result && result.hasOwnProperty('message')) {
                     return;
                 }
 
-                let statusRegex = /Active:\s(.+?)\s/, match = data.match(statusRegex);
+                if(result === null) {
+                    mosdns.CodeMirror.setValue(jsyaml.dump(JSON.parse(mosdns.default())));
+                }
 
-                btnStatus.innerHTML = match ? match[1] : '无法提取的状态信息';
+            });
+
+        },
+
+        getStatus : (serviceName) => {
+
+            mosdns.cockpitSpawn(['systemctl', 'status', serviceName], (result) => {
+
+                let btnStatus = document.querySelector('#mosdnsstatus');
+                console.log('getStatus', result);
+
+                if(result && result.hasOwnProperty('message')) {
+                    btnStatus.innerHTML = result['exit_status'] + '-' + result['message'];
+                    return;
+                }
+
+                let statusRegex = /Active:\s(.+?)\s/, match = result.match(statusRegex);
+                let status = match ? match[1] : '无法提取的状态信息';
+
+                btnStatus.innerHTML = status;
+
+                if(status === 'active') {
+                    document.querySelector('#mosdnsActive').setAttribute('checked',  true);
+                }
 
             });
         },
@@ -260,38 +375,53 @@
         readCustomList : (dirfile, type) => {
             console.log(dirfile);
             mosdns.cockpitFileRead(dirfile, (result, tag) => {
-                console.log(result);
-                console.log(tag);
-                if(result.hasOwnProperty('message')) {
+                if(result && result.hasOwnProperty('message')) {
                     return;
                 }
 
                 document.querySelector('textarea[data-tag="'+ type +'"]').innerHTML = result;
-
-                
             });
         },
 
         readConfig : (dirfile, type) => {
             console.log(dirfile);
             mosdns.cockpitFileReadYAML(dirfile, (result, tag) => {
-                console.log(result);
-                console.log(tag);
-                if(result.hasOwnProperty('message')) {
+                console.log('readConfig', tag, result);
+
+                if(result && result.hasOwnProperty('message')) {
                     return;
                 }
+
+                if(result === null) {
+                    mosdns.CodeMirror.setValue(jsyaml.dump(JSON.parse(mosdns.default())));
+                }
+
             });
         },
 
         cockpitSpawn : (list_paramater, callBack) => {
             cockpit.spawn(list_paramater)
-            .done(data => {
+            .then(data => {
                 callBack(data);
             })
             .fail(error => {
                 callBack(error);
             });
         },
+
+        cockpitSpawnStream : (list_paramater, callBack) => {
+            cockpit.spawn(list_paramater)
+            .stream(data => {
+                callBack(data, 'stream');
+            })
+            .then(data => {
+                callBack(data, 'then');
+            })
+            .fail(error => {
+                callBack(error, 'fail');
+            });
+        },
+
 
         cockpitFileRead : (dirfile, callBack) => {
             cockpit.file(dirfile).read()

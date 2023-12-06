@@ -7,9 +7,24 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'" />
 
     <link rel="stylesheet" href="./asset/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./asset/css/codemirror.min.css">
+    <link rel="stylesheet" href="./asset/css/monokai.min.css">
+
     <link rel="stylesheet" href="./asset/css/custom.css">
 
     <script src="../base1/cockpit.js"></script>
+
+    <script src="./asset/js/codemirror/codemirror.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/meta.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/active-line.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/autorefresh.min.js" type="text/javascript"></script>
+
+    <!-- <script src="./asset/js/codemirror/yaml-frontmatter.min.js" type="text/javascript"></script> -->
+    <script src="./asset/js/codemirror/yaml.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/yaml-lint.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/closebrackets.min.js" type="text/javascript"></script>
+    <script src="./asset/js/codemirror/matchbrackets.min.js" type="text/javascript"></script>
+
     <script src="./asset/js/js-yaml.min.js" type="text/javascript"></script>
     <script src="./asset/js/mosdns_event.js" type="text/javascript"></script>
 
@@ -18,15 +33,8 @@
         console.log(mosdnsui);
 
         window.onload = () => {
-            mosdnsui.getStatus('jellyfin');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'whitelist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'blacklist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'greylist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'ddnslist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'hostslist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'redirectionlist');
-            mosdnsui.readCustomList('/etc/cockpit/cockpit.conf', 'prtlist');
-            mosdnsui.readConfig('/usr/share/cockpit/mosdns/config.yaml', 'prtlist');
+            mosdnsui.initCodeMirror();
+            mosdnsui.readMosdnsFiles();
         };
 
     </script>
@@ -51,6 +59,10 @@
                     <button class="nav-link nav-link-main " onclick="mosdnsui.btn.base()" data-toggle="tab"
                         data-target="#nav-data" type="button" role="tab">
                         更新数据库
+                    </button>
+                    <button class="nav-link nav-link-main " onclick="mosdnsui.btn.base()" data-toggle="tab"
+                        data-target="#nav-install" type="button" role="tab">
+                        安装
                     </button>
                     <button class="btn btn-info" id="mosdnsstatus" style="position: absolute; right: 30%;" type="button"
                         role="tab"></button>
@@ -82,13 +94,10 @@
                                             <div class="col">启用</div>
                                             <div class="col-6">
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="checkbox"
-                                                        id="inlineCheckbox1">
+                                                    <input class="form-check-input" type="checkbox" id="mosdnsActive" />
                                                 </div>
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">配置文件</div>
@@ -98,41 +107,33 @@
                                                     <option value="/etc/mosdns/config_custom.yaml">自定义</option>
                                                 </select>
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">监听端口</div>
                                             <div class="col-6">
                                                 <input value="53" type="text" class="form-control">
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">日志等级</div>
                                             <div class="col-6">
-                                                <select class="form-control" id="config">
+                                                <select class="form-control">
                                                     <option value="debug">调试</option>
                                                     <option value="info">信息</option>
                                                     <option value="warn">警告</option>
                                                     <option value="error">错误</option>
                                                 </select>
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">日志文件</div>
                                             <div class="col-6">
                                                 <input value="/var/log/mosdns.log" type="text" class="form-control">
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">国内DNS</div>
@@ -150,9 +151,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
 
@@ -174,9 +173,7 @@
 
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
 
@@ -197,9 +194,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -213,9 +208,7 @@
                                                 <input type="text" value="2" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -225,9 +218,7 @@
                                                 <input type="text" value="30" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
 
@@ -238,9 +229,7 @@
                                                 <input type="text" value="8000" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -250,9 +239,7 @@
                                                 <input type="text" value="86400" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -262,9 +249,7 @@
                                                 <input type="text" value="3600" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -274,9 +259,7 @@
                                                 <input type="text" value="0" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -286,9 +269,7 @@
                                                 <input type="text" value="0" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -300,9 +281,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -314,9 +293,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -328,9 +305,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -344,9 +319,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div data-parent="adfilter" class="row align-items-start custom-hide ">
@@ -368,9 +341,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
 
@@ -385,9 +356,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div data-parent="ednsfilter" class="row align-items-start custom-hide ">
@@ -397,9 +366,7 @@
                                                 <input type="text" value="" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                     </div>
@@ -414,9 +381,7 @@
                                                 <input type="text" value="9091" class="form-control" />
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                         <div class="row align-items-start">
@@ -426,9 +391,7 @@
                                                 <button type="button" class="btn btn-info">刷新缓存</button>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
 
                                     </div>
@@ -465,47 +428,53 @@
                             </div>
                         </div>
                         <div class="col-9">
-                            <div class="tab-content">
+                            <div id="customFilter" class="tab-content">
 
                                 <div data-parent="whitelist" class="tab-pane fade show active" role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="whitelist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="whitelist" data-file="/etc/mosdns/rule/whitelist.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="blacklist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="blacklist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="blacklist" data-file="/etc/mosdns/rule/blocklist.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="greylist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="greylist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="greylist" data-file="/etc/mosdns/rule/greylist.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="ddnslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="ddnslist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="ddnslist" data-file="/etc/mosdns/rule/ddnslist.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="hostslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="hostslist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="hostslist" data-file="/etc/mosdns/rule/hosts.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="redirectionlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="redirectionlist" class="form-control"
+                                            <textarea data-tag="redirectionlist"
+                                                data-file="/etc/mosdns/rule/redirect.txt" class="form-control"
                                                 rows="10"></textarea>
                                         </div>
                                     </div>
@@ -513,7 +482,8 @@
                                 <div data-parent="prtlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="prtlist" class="form-control" rows="10"></textarea>
+                                            <textarea data-tag="prtlist" data-file="/etc/mosdns/rule/local-ptr.txt"
+                                                class="form-control" rows="10"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -547,15 +517,13 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
 
                                             <div class="col">更新周期</div>
                                             <div class="col-6">
-                                                <select class="form-control" id="config">
+                                                <select class="form-control">
                                                     <option value="*">每天</option>
                                                     <option value="1">每周一</option>
                                                     <option value="2">每周二</option>
@@ -567,15 +535,13 @@
                                                 </select>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
 
                                             <div class="col">更新时间</div>
                                             <div class="col-6">
-                                                <select class="form-control" id="config">
+                                                <select class="form-control">
                                                     <option value="0">0:00</option>
                                                     <option value="1">1:00</option>
                                                     <option value="2" selected="">2:00</option>
@@ -603,34 +569,78 @@
                                                 </select>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
                                         </div>
-                                        <div class="row align-items-start">
 
-                                            <div class="col">GitHub 代理</div>
-                                            <div class="col-6">
-                                                <input type="text" value="https://gh-proxy.com" class="form-control" />
-                                            </div>
-
-                                            <div class="col">
-
-                                            </div>
-                                        </div>
                                         <div class="row align-items-start">
 
                                             <div class="col">数据库更新</div>
                                             <div class="col-6">
-                                                <button type="button" class="btn btn-info">检查并更新</button>
+                                                <button onclick="mosdnsui.btn.geoUpdate()" type="button"
+                                                    class="btn btn-info">检查并更新</button>
                                             </div>
 
-                                            <div class="col">
-
-                                            </div>
+                                            <div class="col"></div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div data-update="geo" class="col"></div>
                                         </div>
                                     </div>
 
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="tab-pane fade tab-pane-main show " id="nav-install" role="tabpanel">
+                    <div class="row" style="margin-top: 1.5rem">
+                        <div class="col-3">
+                            <div class="nav flex-column nav-pills" role="tablist">
+                                <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
+                                    data-target="configInfo" type="button" role="tab">配置文件</button>
+                                <button onclick="mosdnsui.btn.card()" class="nav-link" data-toggle="pill"
+                                    data-target="install" type="button" role="tab">安装</button>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="tab-content">
+
+                                <div data-parent="configInfo" class="tab-pane fade show active" role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <textarea id="configEdit" data-tag="config" class="form-control"
+                                                        rows="10"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div data-parent="install" class="tab-pane fade show " role="tabpanel">
+                                    <div class="container custom_from">
+                                        <div class="row align-items-start">
+                                            <div class="col">
+
+                                                <button onclick="mosdnsui.btn.install()" class="btn btn-info"
+                                                    type="button" role="tab">安装</button>
+
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-start">
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <textarea data-tag="install" class="form-control"
+                                                        rows="10"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>
