@@ -41,7 +41,7 @@
             mosdns.CodeMirror = codeMirror;
         },
 
-        yaml : {
+        yaml_syntax : {
             syntax: {
                 parse: (content) => {
                     return mosdns.CodeMirror.setValue(content);
@@ -87,11 +87,11 @@
             },
 
             adfilter : {
-                'geosite.dat' : 'v2ray-geosite',
-                'https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt' : 'anti-AD',
-                'https://raw.githubusercontent.com/Cats-Team/AdRules/main/mosdns_adrules.txt' : 'Cats-Team/AdRules',
-                'https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl_light.txt' : 'oisd (small)',
-                'https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt' : 'oisd (big)',
+                '/etc/mosdns/ads/geosite_category-ads-all.txt' : 'v2ray-geosite',
+                '/etc/mosdns/ads/anti-ad-domains.txt' : 'anti-AD',
+                '/etc/mosdns/ads/mosdns_adrules.txt' : 'Cats-Team/AdRules',
+                '/etc/mosdns/ads/dbl_light.txt' : 'oisd (small)',
+                '/etc/mosdns/ads/dbl.txt' : 'oisd (big)',
             },
         },
 
@@ -119,6 +119,16 @@
 
         },
 
+        initBootstrapDns : () => {
+            let list_options = [];
+
+            for(let key in mosdns.setting.bootstrapdns) {
+                list_options.push('<option value="'+ key +'">'+ mosdns.setting.bootstrapdns[key] +'</option>');
+            }
+
+            document.querySelector('#bootstrapdns').innerHTML = list_options.join('');
+        },
+
         removeClassList : (list_element, removeClassName) => {
             for(let i = 0, dropdown; dropdown = list_element[i]; i++) {
                 dropdown.classList.remove(removeClassName);
@@ -138,6 +148,7 @@
                 if(dropdown.children.length === 0){
                     mosdns.initDns(dropdown, type);
                 }
+
                 if(containsShow) {
                     dropdown.classList.remove('show');
                     return;
@@ -157,18 +168,20 @@
                 if(charCode == 13 || charCode == 3){
 
                     btn.innerHTML = target.value;
+                    btn.setAttribute('data-select', target.value);
                     dropdown.classList.remove('show');
 
                     if(oldHTML !== '请选择') {
                         return;
                     }
 
-                    if(type === 'bootstrap') {
+                    if(type === 'bootstrapdns') {
                         return;
                     }
 
                     let cloneNode = btngroup.cloneNode(true);
                     cloneNode.querySelector('button:first-child').innerHTML = '请选择';
+                    cloneNode.querySelector('button:first-child').setAttribute('data-select', '');
                     cloneNode.querySelector('input').value = '';
                     col.appendChild(cloneNode);    
                 }
@@ -182,17 +195,19 @@
                     oldHTML = btn.innerHTML;
 
                 btn.innerHTML = target.innerHTML;
+                btn.setAttribute('data-select', target.getAttribute('data-value'));
                 dropdown.classList.remove('show');
                 if(oldHTML !== '请选择') {
                     return;
                 }
 
-                if(type === 'bootstrap') {
+                if(type === 'bootstrapdns') {
                     return;
                 }
 
                 let cloneNode = btngroup.cloneNode(true);
                 cloneNode.querySelector('button:first-child').innerHTML = '请选择';
+                cloneNode.querySelector('button:first-child').setAttribute('data-select', '');
                 col.appendChild(cloneNode);    
             },
 
@@ -251,6 +266,19 @@
                 });
             },
 
+            refreshcache : () => {
+                let event = window.event || arguments.callee.caller.arguments,
+                    target = event.currentTarget, data_target = target.getAttribute('data-target');
+
+                target.setAttribute('disabled', 'disabled');
+
+                mosdns.cockpitSpawn(["/bin/bash", "-c", "curl -X GET  http://localhost:9091/plugins/lazy_cache/flush"], (data) => {
+                    console.log(data);
+                    target.removeAttribute('disabled');
+                });
+
+            },
+
             geoUpdate : () => {
                 let event = window.event || arguments.callee.caller.arguments,
                     target = event.currentTarget, divider = document.querySelector('div[data-update="geo"]') ;
@@ -268,21 +296,14 @@
             card : () => {
                 let event = window.event || arguments.callee.caller.arguments,
                     target = event.currentTarget, card = target.parentNode.parentNode.parentNode,
-                    collapse = card.querySelector('div.collapse'), data_target = target.getAttribute('data-target'),
-                    containsShow = target.classList.contains('active');
-
-                console.log(card.querySelector('div.collapse'));
+                    data_target = target.getAttribute('data-target');
 
                 mosdns.removeClassList(card.parentNode.querySelectorAll('button.nav-link'), 'active');
                 mosdns.removeClassList(card.parentNode.querySelectorAll('div.tab-pane'), 'active');
 
                 card.querySelector('div[data-parent="'+data_target+'"]').classList.add('active');
-
-                if(containsShow) {
-                    collapse.classList.remove('active');
-                    return;
-                }
-                target.classList.toggle('active');
+                target.classList.add('active');
+                
             },
 
             element_filter : () => {
@@ -299,6 +320,94 @@
             },
 
             save : () => {
+                let event = window.event || arguments.callee.caller.arguments,
+                    target = event.currentTarget, config = jsyaml.load(mosdns.CodeMirror.getValue()),
+                    mosdnsmessage = document.querySelector('#mosdnsmessage');
+
+                mosdnsmessage.value = '';
+                mosdnsmessage.style.height = '0px';
+
+                target.setAttribute('disabled', 'disabled');
+
+                config.plugins.find( item => item.tag === 'udp_server' ).args.listen = ':' + document.querySelector('#port').value;
+                config.plugins.find( item => item.tag === 'tcp_server' ).args.listen = ':' + document.querySelector('#port').value;
+                config.plugins.find( item => item.tag === 'modify_ttl' ).args[0].exec = 'ttl ' + document.querySelector('#ttlmin').value + '-' + document.querySelector('#ttlmax').value;
+                
+                config.log.level = document.querySelector('#loginfo').options[document.querySelector('#loginfo').selectedIndex].value;
+                config.log.file = document.querySelector('#logfile').value;
+                config.api.http = '0.0.0.0:' + document.querySelector('#apiPort').value;
+                
+                config.plugins.find(item => item['tag'] === 'fallback').args.primary = document.querySelector('#fallback').checked ? 'forward_remote_upstream' : 'query_is_non_local_ip';
+
+                for(let i = 0, element, list_element = document.querySelectorAll('input.lazy_cache'); element = list_element[i]; i++) {
+                    config.plugins.find( item => item.tag === 'lazy_cache' ).args[element.id] = element.value;
+                }
+
+                let concurrent = document.querySelector('#concurrent').value,
+                    idle_timeout = document.querySelector('#idle_timeout').value,
+                    enable_pipeline = document.querySelector('#enable_pipeline').checked,
+                    insecure_skip_verify = document.querySelector('#insecure_skip_verify').checked,
+                    adfilter = document.querySelector('#adfilter').checked,
+                    bootstrapdns = document.querySelector('#bootstrapdns').options[document.querySelector('#bootstrapdns').selectedIndex].value,
+                    map_dns = {};
+
+                for(let i = 0, element, list_element = document.querySelectorAll('button.btn-dns'); element = list_element[i]; i++) {
+                    let tag = element.getAttribute('data-tag');
+
+                    if(!map_dns.hasOwnProperty(tag)){
+                        map_dns[tag] = { upstreams : []};
+                    }
+                    if(element.getAttribute('data-select')){
+                        map_dns[tag]['concurrent'] = parseInt(concurrent);
+                        map_dns[tag]['upstreams'].push({
+                            addr : element.getAttribute('data-select'),
+                            bootstrap : bootstrapdns,
+                            idle_timeout : parseInt(idle_timeout),
+                            enable_pipeline : enable_pipeline,
+                            insecure_skip_verify : insecure_skip_verify,
+                        });
+                    }
+                }
+
+                for(let key in map_dns) {
+                    let index = config.plugins.findIndex(item => item['tag'] === key);
+                    console.log(config.plugins[index]);
+                    console.log(map_dns[key]);
+                    if(index !== -1){
+                        config.plugins[index]['args'] = map_dns[key];
+                    }
+                }
+
+                console.log('map_dns', map_dns);
+                console.log(config);
+
+                cockpit.file("/etc/mosdns/config.yaml").replace(jsyaml.dump(config))
+                .then(tag => {
+                    console.log(tag);
+
+                    mosdns.cockpitSpawnStream(["/bin/bash", "-c", `/usr/share/cockpit/mosdns/start_mosdns.sh `], (data, type) => {
+                        switch(type) {
+                            case 'stream' :
+                                mosdnsmessage.value = data;
+                                document.querySelector('#mosdnsActive').checked = /Active:\s+active\s+\(running\)/.test(data);
+                                break;
+                            case 'then' :
+                                
+                            default :
+                                console.log('default');
+                                mosdnsmessage.style.height = mosdnsmessage.scrollHeight + 'px';
+                                target.removeAttribute('disabled');
+                                break;
+                        }
+                    });
+                    
+                })
+                .catch(error => {
+                    console.log(error);
+                    target.removeAttribute('disabled');
+                });
+
+                
 
             }
         },
@@ -312,7 +421,7 @@
                     textarea.innerHTML += result + '启动成功 \r\n';
                     textarea.scrollTop = textarea.scrollHeight;
                     target.removeAttribute('disabled');
-                    mosdns.getStatus('mosdns');
+                    mosdns.getStatus('status', 'mosdns');
                 });
             })
             .catch(error => {
@@ -324,7 +433,7 @@
 
         readMosdnsFiles : () => {
 
-            mosdns.getStatus('mosdns');
+            mosdns.getStatus('status','mosdns');
 
             for(let i = 0, filter, list_filter = document.querySelectorAll('#customFilter textarea'); filter = list_filter[i]; i++) {
                 mosdns.cockpitFileRead(filter.getAttribute('data-file'), (result, tag) => {
@@ -336,6 +445,8 @@
 
             mosdns.cockpitFileReadYAML('/etc/mosdns/config.yaml', (result, tag) => {
 
+                console.log('cockpitFileReadYAML', result);
+
                 if(result && result.hasOwnProperty('message')) {
                     return;
                 }
@@ -344,31 +455,165 @@
                     mosdns.CodeMirror.setValue(jsyaml.dump(JSON.parse(mosdns.default())));
                 }
 
+                mosdns.initConfigUI();
+
             });
 
         },
 
-        getStatus : (serviceName) => {
+        initConfigUI : () => {
+            let config = jsyaml.load(mosdns.CodeMirror.getValue());
+            console.log('jsonArgs', config);
 
-            mosdns.cockpitSpawn(['systemctl', 'status', serviceName], (result) => {
+            try {
+                
+                let port = config.plugins.find(item => item['tag'] === 'udp_server'), 
+                    list_dns = config.plugins.filter(item => item['type'] === 'forward'), 
+                    lazy_cache = config.plugins.find(item => item['tag'] === 'lazy_cache'), 
+                    adlist = config.plugins.find(item => item['tag'] === 'adlist'),
+                    fallback = config.plugins.find(item => item['tag'] === 'fallback'),
+                    modify_ttl = config.plugins.find(item => item['tag'] === 'modify_ttl');
+
+                document.querySelector('#port').setAttribute('value', port['args']['listen'].replace(':', ''));
+                document.querySelector('#loginfo option[value="'+ config['log']['level'] +'"]').setAttribute('selected', true);
+                document.querySelector('#logfile').setAttribute('value', config['log']['file']);
+                document.querySelector('#apiPort').value = config.api.http.slice(config.api.http.indexOf(':') + 1);
+
+                let map_dsnEelement = {
+                    china : {
+                        term : 'chinadns', setting : mosdns.setting.chinadns,
+                        element : () => {
+                            return document.querySelector('#' + map_dsnEelement.china.term);
+                        },
+                    },
+                    overseas : {
+                        term : 'overseasdns', setting : mosdns.setting.overseasdns,
+                        element : () => {
+                            return document.querySelector('#' + map_dsnEelement.overseas.term);
+                        },
+                    },
+
+                    single : {
+                        concurrent : 2,                 //DNS 服务器并发数（默认 2）
+                        idle_timeout : 30,               //空闲超时
+                        enable_pipeline : false,        //TCP/DoT 使用 RFC 7766 新的 query pipelining 连接复用模式
+                        insecure_skip_verify : false,   //禁用 TLS 服务器证书验证
+                        fallback : false,               //防止 DNS 泄漏
+                        modify_ttl : {                  
+                            min : 0,                    //覆盖最小 TTL 值（默认 0）
+                            max : 0,                    //覆盖最大 TTL 值（默认 0）
+                        },
+                        bootstrap : '119.29.29.29',     //Bootstrap DNS 服务器
+                    },
+
+                    adlist : [],
+
+                };
+
+                map_dsnEelement.single.fallback = fallback.args.primary === 'forward_remote_upstream' ? true : false;
+                
+                let match = modify_ttl.args[0].exec.match(/(\d+)-(\d+)/);
+                
+                map_dsnEelement.single.modify_ttl = match ? {
+                    min : parseInt(match[1]),
+                    max : parseInt(match[2]),
+                } : map_dsnEelement.single.modify_ttl;
+
+                for(let key in lazy_cache.args) {
+                    document.querySelector('#' + key).value = lazy_cache.args[key];
+                }
+                
+
+                for(let i = 0, dns; dns = list_dns[i]; i++) {
+
+                    map_dsnEelement.single.concurrent = dns['args']['concurrent'];
+
+                    switch (dns['tag']) {
+                        case 'forward_local':
+                            mosdns.matchElementDNS(dns['args']['upstreams'], map_dsnEelement.china, map_dsnEelement);
+                            break;
+                        case 'forward_remote':
+                            mosdns.matchElementDNS(dns['args']['upstreams'], map_dsnEelement.overseas, map_dsnEelement);
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                }
+
+                console.log('adlist', adlist);
+                for(let i = 0, file; file = adlist.args.files[i]; i++) {
+                    if(file === '/etc/mosdns/rule/disable-ads.txt') {
+                        break;
+                    }
+                    map_dsnEelement.adlist.push(file);
+                }
+
+                console.log('map_dsnEelement', map_dsnEelement);
+
+                document.querySelector('#bootstrapdns option[value="'+ map_dsnEelement.single.bootstrap +'"]').setAttribute('selected', true);
+                document.querySelector('#concurrent').value = map_dsnEelement.single.concurrent;
+                document.querySelector('#idle_timeout').value = map_dsnEelement.single.idle_timeout;
+                document.querySelector('#enable_pipeline').checked = map_dsnEelement.single.enable_pipeline;
+                document.querySelector('#insecure_skip_verify').checked = map_dsnEelement.single.insecure_skip_verify;
+                document.querySelector('#fallback').checked = map_dsnEelement.single.fallback;
+                document.querySelector('#ttlmin').value = map_dsnEelement.single.modify_ttl.min;
+                document.querySelector('#ttlmax').value = map_dsnEelement.single.modify_ttl.max;
+                
+                document.querySelector('#adfilter').setAttribute('checked', map_dsnEelement.adlist.length === 0 ? false : true);
+                if(map_dsnEelement.adlist.length !== 0) {
+                    document.querySelector('div[data-parent="adfilter"]').classList.remove('custom-hide');
+                }
+                //
+
+                console.log('jsonArgs', config);
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
+        matchElementDNS : (list_dns, map_dns, map_dsnEelement) => {
+
+            let fragment = document.createDocumentFragment(),
+                findGroup = map_dns.element().querySelector('div.' + map_dns.term);
+
+            for(let i = 0, dns; dns = list_dns[i]; i++) {
+                let group = findGroup.cloneNode(true);
+                group.querySelector('button.btn-secondary').innerHTML = map_dns.hasOwnProperty(dns['addr']) ? map_dns[dns['addr']] : dns['addr'];
+                group.querySelector('button.btn-secondary').setAttribute('data-select', dns['addr']);
+                fragment.appendChild(group);
+                map_dsnEelement.single.bootstrap = dns['bootstrap'];
+                map_dsnEelement.single.idle_timeout = dns['idle_timeout'];
+                map_dsnEelement.single.enable_pipeline = dns['enable_pipeline'];
+                map_dsnEelement.single.insecure_skip_verify = dns['insecure_skip_verify'];
+            }
+
+            map_dns.element().insertBefore(fragment, findGroup);
+
+        },
+
+
+        getStatus : (serviceType, serviceName, callBack) => {
+
+            mosdns.cockpitSpawnStream(['systemctl', serviceType, serviceName], (result, type) => {
 
                 let btnStatus = document.querySelector('#mosdnsstatus');
-                console.log('getStatus', result);
 
-                if(result && result.hasOwnProperty('message')) {
-                    btnStatus.innerHTML = result['exit_status'] + '-' + result['message'];
-                    return;
+                console.log(serviceType, type, result);
+
+                if(type === 'stream'){
+                    let message = document.querySelector('#mosdnsmessage');
+                    message.value = result;
+                    setTimeout(() => {
+                        message.style.height = message.scrollHeight + 'px';
+                    }, 450);
+
+                    document.querySelector('#mosdnsActive').checked = /Active:\s+active\s+\(running\)/.test(result);
                 }
-
-                let statusRegex = /Active:\s(.+?)\s/, match = result.match(statusRegex);
-                let status = match ? match[1] : '无法提取的状态信息';
-
-                btnStatus.innerHTML = status;
-
-                if(status === 'active') {
-                    document.querySelector('#mosdnsActive').setAttribute('checked',  true);
+                if(typeof callBack === 'function' || callBack instanceof Function){
+                    callBack();
                 }
-
+                btnStatus.classList.remove('custom-hide');
             });
         },
 
@@ -395,6 +640,10 @@
                 if(result === null) {
                     mosdns.CodeMirror.setValue(jsyaml.dump(JSON.parse(mosdns.default())));
                 }
+
+                let jsonArgs = jsyaml.load(mosdns.CodeMirror.getValue());
+
+                console.log('jsonArgs', jsonArgs);
 
             });
         },
@@ -435,7 +684,7 @@
 
         cockpitFileReadYAML : (dirfile, callBack) => {
 
-            cockpit.file(dirfile, mosdns.yaml).read()
+            cockpit.file(dirfile, mosdns.yaml_syntax).read()
             .then((content, tag) => {
                 callBack(content, tag);
             })

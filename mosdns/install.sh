@@ -56,7 +56,7 @@ create_mosdns_file() {
     fi
 
     folder="/etc/mosdns/rule"
-    folderFile=("$folder/whitelist.txt" "$folder/blocklist.txt" "$folder/greylist.txt" "$folder/ddnslist.txt" "$folder/hosts.txt" "$folder/redirect.txt" "$folder/local-ptr.txt" "$folder/cloudflare-cidr.txt")
+    folderFile=("$folder/whitelist.txt" "$folder/blocklist.txt" "$folder/greylist.txt" "$folder/ddnslist.txt" "$folder/hosts.txt" "$folder/redirect.txt" "$folder/local-ptr.txt" "$folder/cloudflare-cidr.txt" "$folder/disable-ads.txt")
 
 
     [ -d "$folder" ] || mkdir -p "$folder" && echo "文件夹 '$folder' 创建."

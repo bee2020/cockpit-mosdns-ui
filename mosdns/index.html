@@ -34,6 +34,7 @@
 
         window.onload = () => {
             mosdnsui.initCodeMirror();
+            mosdnsui.initBootstrapDns();
             mosdnsui.readMosdnsFiles();
         };
 
@@ -46,6 +47,12 @@
     <div class="container">
 
         <div style="margin-top: 3rem;margin-bottom: 3rem;">
+
+            <div id="mosdnsstatus" class="alert alert-primary custom-hide" role="alert">
+                <textarea id="mosdnsmessage" disabled style="resize: none;background-color: transparent; border: none;"
+                    class="form-control"></textarea>
+            </div>
+
             <nav>
                 <div style="position: relative;" class="nav nav-tabs" id="nav-tab" role="tablist">
                     <button class="nav-link nav-link-main active" onclick="mosdnsui.btn.base()" data-toggle="tab"
@@ -64,8 +71,6 @@
                         data-target="#nav-install" type="button" role="tab">
                         安装
                     </button>
-                    <button class="btn btn-info" id="mosdnsstatus" style="position: absolute; right: 30%;" type="button"
-                        role="tab"></button>
                     <button onclick="mosdnsui.btn.save()" class="nav-link nav-link-save"
                         style="position: absolute; right: 0;" type="button" role="tab">保存</button>
 
@@ -112,14 +117,14 @@
                                         <div class="row align-items-start">
                                             <div class="col">监听端口</div>
                                             <div class="col-6">
-                                                <input value="53" type="text" class="form-control">
+                                                <input id="port" value="" type="text" class="form-control">
                                             </div>
                                             <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">日志等级</div>
                                             <div class="col-6">
-                                                <select class="form-control">
+                                                <select id="loginfo" class="form-control" autocomplete="off">
                                                     <option value="debug">调试</option>
                                                     <option value="info">信息</option>
                                                     <option value="warn">警告</option>
@@ -131,24 +136,24 @@
                                         <div class="row align-items-start">
                                             <div class="col">日志文件</div>
                                             <div class="col-6">
-                                                <input value="/var/log/mosdns.log" type="text" class="form-control">
+                                                <input id="logfile" value="/var/log/mosdns.log" type="text"
+                                                    class="form-control">
                                             </div>
                                             <div class="col"></div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">国内DNS</div>
-                                            <div class="col-6">
-                                                <div class="btn-group btn-group-custom" style="">
-                                                    <button onclick="mosdnsui.btn.dns('chinadns')" type="button"
+                                            <div id="chinadns" class="col-6">
+                                                <div class="btn-group btn-group-custom chinadns">
+                                                    <button data-tag="forward_local"
+                                                        onclick="mosdnsui.btn.dns('chinadns')" type="button"
                                                         style="text-align: left; width: 90%;"
-                                                        class="btn btn-secondary btn-dns-china">请选择</button>
+                                                        class="btn btn-secondary btn-dns-china btn-dns">请选择</button>
                                                     <button type="button" onclick="mosdnsui.btn.dns_remove()"
                                                         class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
                                                         <span class="sr-only">Toggle Dropdown</span>
                                                     </button>
-                                                    <div class="dropdown-menu">
-
-                                                    </div>
+                                                    <div class="dropdown-menu"></div>
                                                 </div>
                                             </div>
                                             <div class="col"></div>
@@ -156,18 +161,17 @@
                                         <div class="row align-items-start">
 
                                             <div class="col">国外DNS</div>
-                                            <div class="col-6">
-                                                <div class="btn-group btn-group-custom">
-                                                    <button onclick="mosdnsui.btn.dns('overseasdns')" type="button"
+                                            <div id="overseasdns" class="col-6">
+                                                <div class="btn-group btn-group-custom overseasdns">
+                                                    <button data-tag="forward_remote"
+                                                        onclick="mosdnsui.btn.dns('overseasdns')" type="button"
                                                         style="text-align: left; width: 90%;"
-                                                        class="btn btn-secondary btn-dns-overseas">请选择</button>
+                                                        class="btn btn-secondary btn-dns-overseas btn-dns">请选择</button>
                                                     <button type="button" onclick="mosdnsui.btn.dns_remove()"
                                                         class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
                                                         <span class="sr-only">Toggle Dropdown</span>
                                                     </button>
-                                                    <div class="dropdown-menu">
-
-                                                    </div>
+                                                    <div class="dropdown-menu"></div>
 
                                                 </div>
 
@@ -179,19 +183,8 @@
 
                                             <div class="col">Bootstrap DNS 服务器</div>
                                             <div class="col-6">
-                                                <div class="btn-group btn-group-custom">
-                                                    <button onclick="mosdnsui.btn.dns('bootstrapdns')" type="button"
-                                                        style="text-align: left; width: 90%;"
-                                                        class="btn btn-secondary btn-dns-bootstrap">请选择</button>
-                                                    <button type="button"
-                                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split ">
-                                                        <span class="sr-only">Toggle Dropdown</span>
-                                                    </button>
-                                                    <div class="dropdown-menu">
-
-                                                    </div>
-
-                                                </div>
+                                                <select class="form-control" id="bootstrapdns">
+                                                </select>
                                             </div>
 
                                             <div class="col"></div>
@@ -205,7 +198,7 @@
 
                                             <div class="col">DNS 服务器并发数（默认 2）</div>
                                             <div class="col-6">
-                                                <input type="text" value="2" class="form-control" />
+                                                <input id="concurrent" type="text" value="" class="form-control" />
                                             </div>
 
                                             <div class="col"></div>
@@ -215,7 +208,7 @@
 
                                             <div class="col">空闲超时</div>
                                             <div class="col-6">
-                                                <input type="text" value="30" class="form-control" />
+                                                <input id="idle_timeout" type="text" value="" class="form-control" />
                                             </div>
 
                                             <div class="col"></div>
@@ -226,7 +219,7 @@
 
                                             <div class="col">DNS 缓存大小</div>
                                             <div class="col-6">
-                                                <input type="text" value="8000" class="form-control" />
+                                                <input id="size" type="text" value="" class="form-control lazy_cache" />
                                             </div>
 
                                             <div class="col"></div>
@@ -234,9 +227,10 @@
 
                                         <div class="row align-items-start">
 
-                                            <div class="col">乐观缓存 TTL</div>
+                                            <div class="col">DNS 乐观缓存 TTL</div>
                                             <div class="col-6">
-                                                <input type="text" value="86400" class="form-control" />
+                                                <input id="lazy_cache_ttl" type="text" value=""
+                                                    class="form-control lazy_cache" />
                                             </div>
 
                                             <div class="col"></div>
@@ -244,9 +238,21 @@
 
                                         <div class="row align-items-start">
 
-                                            <div class="col">自动保存缓存</div>
+                                            <div class="col">DNS 自动保存缓存</div>
                                             <div class="col-6">
-                                                <input type="text" value="3600" class="form-control" />
+                                                <input id="dump_interval" type="text" value=""
+                                                    class="form-control lazy_cache" />
+                                            </div>
+
+                                            <div class="col"></div>
+                                        </div>
+
+                                        <div class="row align-items-start">
+
+                                            <div class="col">缓存文件</div>
+                                            <div class="col-6">
+                                                <input id="dump_file" type="text" value=""
+                                                    class="form-control lazy_cache" />
                                             </div>
 
                                             <div class="col"></div>
@@ -256,7 +262,7 @@
 
                                             <div class="col">覆盖最小 TTL 值（默认 0）</div>
                                             <div class="col-6">
-                                                <input type="text" value="0" class="form-control" />
+                                                <input id="ttlmin" type="text" value="" class="form-control" />
                                             </div>
 
                                             <div class="col"></div>
@@ -266,7 +272,7 @@
 
                                             <div class="col">覆盖最大 TTL 值（默认 0）</div>
                                             <div class="col-6">
-                                                <input type="text" value="0" class="form-control" />
+                                                <input id="ttlmax" type="text" value="" class="form-control" />
                                             </div>
 
                                             <div class="col"></div>
@@ -277,7 +283,8 @@
                                             <div class="col">TCP/DoT 连接复用</div>
                                             <div class="col-6">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" />
+                                                    <input id="enable_pipeline" class="form-check-input"
+                                                        type="checkbox" />
                                                 </div>
                                             </div>
 
@@ -289,7 +296,8 @@
                                             <div class="col">禁用 TLS 证书</div>
                                             <div class="col-6">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" />
+                                                    <input id="insecure_skip_verify" class="form-check-input"
+                                                        type="checkbox" />
                                                 </div>
                                             </div>
 
@@ -301,7 +309,7 @@
                                             <div class="col">防止 DNS 泄漏</div>
                                             <div class="col-6">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" />
+                                                    <input id="fallback" class="form-check-input" type="checkbox" />
                                                 </div>
                                             </div>
 
@@ -313,7 +321,7 @@
                                             <div class="col">启用 DNS 广告过滤</div>
                                             <div class="col-6">
                                                 <div class="form-check">
-                                                    <input data-target="adfilter"
+                                                    <input id="adfilter" data-target="adfilter"
                                                         onclick="mosdnsui.btn.element_filter()" class="form-check-input"
                                                         type="checkbox" />
                                                 </div>
@@ -350,7 +358,7 @@
                                             <div class="col">启用 EDNS 客户端子网</div>
                                             <div class="col-6">
                                                 <div class="form-check">
-                                                    <input data-target="ednsfilter"
+                                                    <input data-target="ednsfilter" disabled
                                                         onclick="mosdnsui.btn.element_filter()" class="form-check-input"
                                                         type="checkbox" />
                                                 </div>
@@ -378,7 +386,7 @@
 
                                             <div class="col">API 监听端口</div>
                                             <div class="col-6">
-                                                <input type="text" value="9091" class="form-control" />
+                                                <input id="apiPort" type="text" value="" class="form-control" />
                                             </div>
 
                                             <div class="col"></div>
@@ -388,7 +396,8 @@
 
                                             <div class="col">刷新缓存</div>
                                             <div class="col-6">
-                                                <button type="button" class="btn btn-info">刷新缓存</button>
+                                                <button onclick="mosdnsui.btn.refreshcache()" type="button"
+                                                    class="btn btn-info">刷新缓存</button>
                                             </div>
 
                                             <div class="col"></div>
