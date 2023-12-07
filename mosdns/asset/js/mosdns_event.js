@@ -385,7 +385,7 @@
                 .then(tag => {
                     console.log(tag);
 
-                    mosdns.cockpitSpawnStream(["/bin/bash", "-c", `/usr/share/cockpit/mosdns/start_mosdns.sh `], (data, type) => {
+                    mosdns.cockpitSpawnStream(["/bin/bash", "-c", `/usr/share/cockpit/mosdns/restart_mosdns.sh `], (data, type) => {
                         switch(type) {
                             case 'stream' :
                                 mosdnsmessage.value = data;
