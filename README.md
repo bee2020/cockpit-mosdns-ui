@@ -40,3 +40,5 @@ systemctl status cockpit
 ```
 
 2, Copy mosdns directorie are /usr/share/cockpit
+
+
