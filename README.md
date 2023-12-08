@@ -23,5 +23,20 @@ apt install -t ${VERSION_CODENAME}-backports cockpit
 systemctl status cockpit
 ```
 
+## 插件配置
 
-## 准备工作
+1, This means that, by default the following directories are searched for cockpit packages, and in this order:Cockpit 
+
+* `~/.local/share/cockpit/`
+* `/usr/local/share/cockpit/`
+* `/usr/share/cockpit/`
+
+```properties
+/usr/share/cockpit/
+    my-package/
+        manifest.json
+        file.html
+        some.js
+```
+
+2, Copy mosdns directorie are /usr/share/cockpit
