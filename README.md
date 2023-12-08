@@ -25,7 +25,7 @@ systemctl status cockpit
 
 ## 插件配置
 
-1, This means that, by default the following directories are searched for cockpit packages, and in this order:Cockpit 
+1, This means that, by default the following directories are searched for cockpit packages, and in this order:Cockpit
 
 * `~/.local/share/cockpit/`
 * `/usr/local/share/cockpit/`
@@ -41,4 +41,6 @@ systemctl status cockpit
 
 2, Copy mosdns directorie are /usr/share/cockpit
 
-
+```bash
+chmod +x /usr/share/cockpit/mosdns/*.sh
+```
