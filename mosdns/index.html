@@ -26,6 +26,7 @@
     <script src="./asset/js/codemirror/matchbrackets.min.js" type="text/javascript"></script>
 
     <script src="./asset/js/js-yaml.min.js" type="text/javascript"></script>
+    <script src="./asset/js/async.min.js" type="text/javascript"></script>
     <script src="./asset/js/mosdns_event.js" type="text/javascript"></script>
 
     <script type="text/javascript" charset="utf-8">
@@ -44,18 +45,25 @@
 
 <body>
 
+    <div id="spinner" class="position-fixed position-fixed-spinner">
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
 
         <div style="margin-top: 3rem;margin-bottom: 3rem;">
 
-            <div id="mosdnsstatus" class="alert alert-primary custom-hide" role="alert">
-                <textarea id="mosdnsmessage" disabled style="resize: none;background-color: transparent; border: none;"
-                    class="form-control"></textarea>
-            </div>
-
             <nav>
                 <div style="position: relative;" class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link nav-link-main active" onclick="mosdnsui.btn.base()" data-toggle="tab"
+                    <button id="statusBtn" class="nav-link nav-link-main active" onclick="mosdnsui.btn.base()"
+                        data-toggle="tab" data-target="#nav-status" type="button" role="tab">
+                        状态
+                    </button>
+                    <button class="nav-link nav-link-main" onclick="mosdnsui.btn.base()" data-toggle="tab"
                         data-target="#nav-home" type="button" role="tab">
                         基本设置
                     </button>
@@ -69,7 +77,7 @@
                     </button>
                     <button class="nav-link nav-link-main " onclick="mosdnsui.btn.base()" data-toggle="tab"
                         data-target="#nav-install" type="button" role="tab">
-                        安装
+                        配置&安装
                     </button>
                     <button onclick="mosdnsui.btn.save()" class="nav-link nav-link-save"
                         style="position: absolute; right: 0;" type="button" role="tab">保存</button>
@@ -77,10 +85,24 @@
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade tab-pane-main active show " id="nav-home" role="tabpanel">
+                <div class="tab-pane fade tab-pane-main active show " id="nav-status" role="tabpanel">
+                    <div data-parent="base" class="tab-pane fade show active" role="tabpanel">
+                        <div class="row" style="margin-top: 1.5rem">
+                            <div class="col">
+                                <div id="mosdnsstatus" class="p-3 mb-2 bg-secondary bg-gradient text-white ">
+                                    <textarea id="mosdnsmessage" disabled
+                                        style="resize: none;background-color: transparent; border: none; color: #fff;"
+                                        class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade tab-pane-main  show " id="nav-home" role="tabpanel">
 
                     <div class="row" style="margin-top: 1.5rem">
-                        <div class="col-3">
+                        <div class="col-3" style="border-right: 1px solid #dadada;">
                             <div class="nav flex-column nav-pills" role="tablist">
                                 <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
                                     data-target="base" type="button" role="tab">基本配置</button>
@@ -93,7 +115,8 @@
 
                         <div class="col-9">
                             <div class="tab-content">
-                                <div data-parent="base" class="tab-pane fade show active" role="tabpanel">
+
+                                <div data-parent="base" class="tab-pane fade active show" role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="row align-items-start">
                                             <div class="col">启用</div>
@@ -333,11 +356,11 @@
                                         <div data-parent="adfilter" class="row align-items-start custom-hide ">
 
                                             <div class="col">广告过滤规则来源</div>
-                                            <div class="col-6">
+                                            <div id="adfiltergroup" class="col-6">
                                                 <div class="btn-group btn-group-custom">
                                                     <button onclick="mosdnsui.btn.dns('adfilter')" type="button"
                                                         style="text-align: left; width: 90%;"
-                                                        class="btn btn-secondary btn-dns-overseas">请选择</button>
+                                                        class="btn btn-secondary btn-adfilter">请选择</button>
                                                     <button type="button" onclick="mosdnsui.btn.dns_remove()"
                                                         class="btn btn-secondary dropdown-toggle dropdown-toggle-split closed">
                                                         <span class="sr-only">Toggle Dropdown</span>
@@ -418,7 +441,7 @@
 
                 <div class="tab-pane fade tab-pane-main show " id="nav-rule" role="tabpanel">
                     <div class="row" style="margin-top: 1.5rem">
-                        <div class="col-3">
+                        <div class="col-3" style="border-right: 1px solid #dadada;">
                             <div class="nav flex-column nav-pills" role="tablist">
                                 <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
                                     data-target="whitelist" type="button" role="tab">白名单</button>
@@ -442,57 +465,63 @@
                                 <div data-parent="whitelist" class="tab-pane fade show active" role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="whitelist" data-file="/etc/mosdns/rule/whitelist.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="whitelist" data-tag="whitelist"
+                                                data-file="/etc/mosdns/rule/whitelist.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="blacklist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="blacklist" data-file="/etc/mosdns/rule/blocklist.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="blocklist" data-tag="blacklist"
+                                                data-file="/etc/mosdns/rule/blocklist.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="greylist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="greylist" data-file="/etc/mosdns/rule/greylist.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="greylist" data-tag="greylist"
+                                                data-file="/etc/mosdns/rule/greylist.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="ddnslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="ddnslist" data-file="/etc/mosdns/rule/ddnslist.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="ddnslist" data-tag="ddnslist"
+                                                data-file="/etc/mosdns/rule/ddnslist.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="hostslist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="hostslist" data-file="/etc/mosdns/rule/hosts.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="hosts" data-tag="hostslist"
+                                                data-file="/etc/mosdns/rule/hosts.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="redirectionlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="redirectionlist"
+                                            <textarea id="redirect" data-tag="redirectionlist"
                                                 data-file="/etc/mosdns/rule/redirect.txt" class="form-control"
-                                                rows="10"></textarea>
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div data-parent="prtlist" class="tab-pane fade show " role="tabpanel">
                                     <div class="container custom_from">
                                         <div class="form-group">
-                                            <textarea data-tag="prtlist" data-file="/etc/mosdns/rule/local-ptr.txt"
-                                                class="form-control" rows="10"></textarea>
+                                            <textarea id="prtlist" data-tag="prtlist"
+                                                data-file="/etc/mosdns/rule/local-ptr.txt" class="form-control"
+                                                rows="13"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -506,7 +535,7 @@
 
                 <div class="tab-pane fade tab-pane-main show " id="nav-data" role="tabpanel">
                     <div class="row" style="margin-top: 1.5rem">
-                        <div class="col-3">
+                        <div class="col-3" style="border-right: 1px solid #dadada;">
                             <div class="nav flex-column nav-pills" role="tablist">
                                 <button class="nav-link active" data-toggle="pill" data-target="#v-pills-home"
                                     type="button" role="tab">更新广告规则、GeoIP & GeoSite 数据库</button>
@@ -606,12 +635,12 @@
 
                 <div class="tab-pane fade tab-pane-main show " id="nav-install" role="tabpanel">
                     <div class="row" style="margin-top: 1.5rem">
-                        <div class="col-3">
+                        <div class="col-3" style="border-right: 1px solid #dadada;">
                             <div class="nav flex-column nav-pills" role="tablist">
                                 <button onclick="mosdnsui.btn.card()" class="nav-link active" data-toggle="pill"
-                                    data-target="configInfo" type="button" role="tab">配置文件</button>
+                                    data-target="configInfo" type="button" role="tab">默认配置</button>
                                 <button onclick="mosdnsui.btn.card()" class="nav-link" data-toggle="pill"
-                                    data-target="install" type="button" role="tab">安装</button>
+                                    data-target="install" type="button" role="tab">设置</button>
                             </div>
                         </div>
                         <div class="col-9">
@@ -623,7 +652,7 @@
                                             <div class="col">
                                                 <div class="form-group">
                                                     <textarea id="configEdit" data-tag="config" class="form-control"
-                                                        rows="10"></textarea>
+                                                        rows="15"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -636,15 +665,22 @@
                                         <div class="row align-items-start">
                                             <div class="col">
 
-                                                <button onclick="mosdnsui.btn.install()" class="btn btn-info"
-                                                    type="button" role="tab">安装</button>
+                                                <button onclick="mosdnsui.btn.install()"
+                                                    class="btn btn-info install-btn" type="button"
+                                                    role="tab">保留配置安装</button>
+                                                <button onclick="mosdnsui.btn.install('init')"
+                                                    class="btn btn-info install-btn" type="button"
+                                                    role="tab">初始化安装</button>
+                                                <button onclick="mosdnsui.btn.uninstall()"
+                                                    class="btn btn-info install-btn" type="button"
+                                                    role="tab">卸载</button>
 
                                             </div>
                                         </div>
                                         <div class="row align-items-start">
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <textarea data-tag="install" class="form-control"
+                                                    <textarea disabled data-tag="install" class="form-control"
                                                         rows="10"></textarea>
                                                 </div>
                                             </div>

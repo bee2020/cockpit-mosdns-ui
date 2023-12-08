@@ -46,6 +46,18 @@ create_mosdns_file() {
 
     echo "config => $yaml_args"
 
+    if [ "$yaml_args" = "init" ]; then
+        rm -rf /etc/mosdns
+        echo "删除 /etc/mosdns 目录及所有文件成功."
+    fi
+
+    if [ ! -e "/etc/mosdns/config.yaml" ]; then
+        touch /etc/mosdns/config.yaml
+        echo "文件 '/etc/mosdns/config.yaml' 创建"
+    else
+        echo "文件 '/etc/mosdns/config.yaml' 已存在。"
+    fi
+
     [ -d "/etc/mosdns" ] || mkdir -p "/etc/mosdns" && echo "文件夹 '/etc/mosdns' 创建."
 
     if [ ! -e "/etc/mosdns/config.yaml" ]; then
@@ -70,6 +82,6 @@ create_mosdns_file() {
 
 install_mosdns
 create_mosdns_file
-. update_geo.sh
+source /usr/share/cockpit/mosdns/update_geo.sh
 
 sudo mosdns service install -d /etc/mosdns -c config.yaml
